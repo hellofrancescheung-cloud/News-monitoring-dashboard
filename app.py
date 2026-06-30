@@ -7,22 +7,18 @@ st.title("无国界医生 MSF Hong Kong — AI News Monitor")
 st.caption("Bilingual Hong Kong Market Media Tracker • Updates Hourly")
 
 try:
-    # Read the data compiled by our background automation task
     df = pd.read_csv("alerts_history.csv")
-    
-    # Calculate counters for monitoring
+
     total_mentions = len(df)
-    # The multilingual model flags negative sentiment as 1 star or 2 stars
-    critical_alerts = len(df[df['Sentiment'].isin(['1 star', '2 stars'])])
-    
+    critical_alerts = len(df[df["Sentiment"] == "NEGATIVE"])
+
     col1, col2 = st.columns(2)
     col1.metric("Total HK Mentions Tracked", total_mentions)
     col2.metric("Critical / Negative Mentions 🚨", critical_alerts, delta_color="inverse")
-    
+
     st.write("---")
     st.subheader("Live Monitoring Log")
-    
-    # Render interactive data table
+
     st.dataframe(
         df,
         column_config={
