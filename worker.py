@@ -40,11 +40,15 @@ try:
             print("Email failed to send:", e)
 
     # 2. LOAD RELIABLE, FULLY PUBLIC OPEN MULTILINGUAL AI MODEL
-    print("Loading open multilingual AI sentiment engine...")
+print("Loading open multilingual AI sentiment engine...")
+try:
     classifier = pipeline(
-        "sentiment-analysis", 
+        "sentiment-analysis",
         model="lxyuan/distilbert-base-multilingual-cased-sentiments-student"
     )
+except Exception as e:
+    print("Failed to load sentiment model:", e)
+    raise
 
     # 3. FETCH DATA FROM BOTH ALERTS
     print("Scanning Hong Kong market feeds...")
