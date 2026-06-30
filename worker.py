@@ -72,8 +72,15 @@ try:
         clean_title = entry.title.replace('<b>', '').replace('</b>', '')
         
         # Process text through Multilingual AI model
-        ai_result = classifier(clean_title[:512])[0]
-        sentiment = str(ai_result['label']).upper() # Outputs 'POSITIVE', 'NEUTRAL', or 'NEGATIVE'
+ai_result = classifier(clean_title[:512])[0]
+raw_label = str(ai_result["label"]).strip().upper()
+
+if "NEG" in raw_label or raw_label in ["1 STAR", "2 STARS"]:
+    sentiment = "NEGATIVE"
+elif "POS" in raw_label or raw_label in ["4 STARS", "5 STARS"]:
+    sentiment = "POSITIVE"
+else:
+    sentiment = "NEUTRAL"
         
         # Trigger email alert if sentiment is explicitly negative
         if "NEG" in sentiment:
