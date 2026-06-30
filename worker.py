@@ -38,13 +38,14 @@ def send_alert_email(title, link, sentiment_label):
 
 # 2. LOAD BILINGUAL MULTILINGUAL AI MODEL (Handles English and Traditional Chinese News)
 print("Loading multilingual AI sentiment engine...")
-classifier = pipeline("sentiment-analysis", model="bhadresh-savani/bert-base-multilingual-cased-sentiment")
+# Using a highly reliable multilingual text classification model
+classifier = pipeline("sentiment-analysis", model="cardiffnlp/bert-base-multilingual-cased-sentiment-multilingual")
 
 # 3. FETCH DATA FROM BOTH ALERTS
 print("Scanning Hong Kong market feeds...")
 feed_entries = []
 for url in RSS_URLS:
-    if url.startswith("http"): # Safety check to make sure it's a real link
+    if url.startswith("http"):
         feed = feedparser.parse(url)
         feed_entries.extend(feed.entries)
 
@@ -68,10 +69,10 @@ for entry in feed_entries:
     
     # Process text through Multilingual AI model
     ai_result = classifier(clean_title[:512])[0]
-    sentiment = ai_result['label'] # Outputs rank: '1 star' (very negative) to '5 stars' (very positive)
+    sentiment = ai_result['label'].lower() # Makes sure it reads 'negative' regardless of capitalization
     
-    # 1 star and 2 stars indicate critical/negative press in this model
-    if sentiment in ['1 star', '2 stars']:
+    # Trigger alert if the AI flags the text label strictly as negative
+    if sentiment == "negative":
         print(f"Alert Triggered: {clean_title}")
         send_alert_email(clean_title, entry.link, sentiment)
         
@@ -79,7 +80,7 @@ for entry in feed_entries:
         "Title": clean_title,
         "Link": entry.link,
         "Published": entry.published,
-        "Sentiment": sentiment,
+        "Sentiment": sentiment.upper(), # Saves nicely as 'NEGATIVE', 'NEUTRAL', or 'POSITIVE'
         "Confidence": round(ai_result['score'], 2)
     })
 
