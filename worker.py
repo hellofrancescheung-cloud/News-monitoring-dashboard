@@ -39,9 +39,12 @@ try:
         except Exception as e:
             print("Email failed to send:", e)
 
-    # 2. LOAD BILINGUAL MULTILINGUAL AI MODEL
-    print("Loading multilingual AI sentiment engine...")
-    classifier = pipeline("sentiment-analysis", model="cardiffnlp/bert-base-multilingual-cased-sentiment-multilingual")
+    # 2. LOAD RELIABLE, FULLY PUBLIC OPEN MULTILINGUAL AI MODEL
+    print("Loading open multilingual AI sentiment engine...")
+    classifier = pipeline(
+        "sentiment-analysis", 
+        model="lxyuan/distilbert-base-multilingual-cased-sentiments-student"
+    )
 
     # 3. FETCH DATA FROM BOTH ALERTS
     print("Scanning Hong Kong market feeds...")
@@ -70,19 +73,10 @@ try:
         
         # Process text through Multilingual AI model
         ai_result = classifier(clean_title[:512])[0]
-        raw_label = str(ai_result['label']).upper()
-        
-        # Map the model's internal labels safely to standard text
-        # LABEL_0 = Negative, LABEL_1 = Neutral, LABEL_2 = Positive
-        if "LABEL_0" in raw_label or "0" in raw_label or "NEG" in raw_label:
-            sentiment = "NEGATIVE"
-        elif "LABEL_2" in raw_label or "2" in raw_label or "POS" in raw_label:
-            sentiment = "POSITIVE"
-        else:
-            sentiment = "NEUTRAL"
+        sentiment = str(ai_result['label']).upper() # Outputs 'POSITIVE', 'NEUTRAL', or 'NEGATIVE'
         
         # Trigger email alert if sentiment is explicitly negative
-        if sentiment == "NEGATIVE":
+        if "NEG" in sentiment:
             print(f"Alert Triggered: {clean_title}")
             send_alert_email(clean_title, entry.link, sentiment)
             
