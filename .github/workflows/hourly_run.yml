@@ -1,0 +1,34 @@
+name: Hourly Brand Monitor
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Automatically ticks on the 0th minute of every hour
+  workflow_dispatch:     # Allows manual testing via the 'Actions' button
+
+jobs:
+  run-monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Copy files
+        uses: actions/checkout@v4
+      - name: Load Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install Tools
+        run: pip install streamlit feedparser pandas transformers torch
+      - name: Run Worker Script
+        env:
+          ALERT_EMAIL_SENDER: ${{ secrets.ALERT_EMAIL_SENDER }}
+          ALERT_EMAIL_PASSWORD: ${{ secrets.ALERT_EMAIL_PASSWORD }}
+          ALERT_EMAIL_RECEIVER: ${{ secrets.ALERT_EMAIL_RECEIVER }}
+        run: python worker.py
+      - name: Save Data File Back to GitHub
+        run: |
+          git config --global user.name "Automation Bot"
+          git config --global user.email "bot@github.com"
+          git add alerts_history.csv
+          git diff-index --quiet HEAD || git commit -m "Hourly Hong Kong data sync"
+          git push
