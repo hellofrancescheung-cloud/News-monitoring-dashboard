@@ -1,8 +1,8 @@
 name: Hourly Brand Monitor V2
 
-on:
+on:  
   schedule:
-    - cron: '0 * * * *'  # Runs on the hour, every hour
+    - cron: '0 * * * *'  # Runs on the hour, every hour  
   workflow_dispatch:     # Allows you to click the button to test manually
 
 jobs:
@@ -10,23 +10,28 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write    # Double-checks that this script explicitly has write access
+
     steps:
       - name: Copy files
         uses: actions/checkout@v4
+
       - name: Load Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-- name: Install dependencies
-  run: |
-    pip install --upgrade pip
-    pip install -r requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
       - name: Run Worker Script
         env:
           ALERT_EMAIL_SENDER: ${{ secrets.ALERT_EMAIL_SENDER }}
           ALERT_EMAIL_PASSWORD: ${{ secrets.ALERT_EMAIL_PASSWORD }}
           ALERT_EMAIL_RECEIVER: ${{ secrets.ALERT_EMAIL_RECEIVER }}
         run: python worker.py
+
       - name: Save Data File Back to GitHub
         run: |
           git config --global user.name "Automation Bot"
