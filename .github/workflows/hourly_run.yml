@@ -1,4 +1,4 @@
-name: Hourly Brand Monitor
+name: Hourly Brand Monitor V2
 
 on:
   schedule:
